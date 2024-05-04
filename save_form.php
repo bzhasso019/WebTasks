@@ -53,7 +53,7 @@ if (!empty($errors)) {
 }
 
 // Создание записи в таблице с формой
-$stmt = $conn->prepare("INSERT INTO forms (fio, phone, email, dob, gender, bio, contract) VALUES (?, ?, ?, ?, ?, ?, ?)");
+$stmt = $conn->prepare("INSERT INTO form_data (fio, phone, email, dob, gender, bio, contract) VALUES (?, ?, ?, ?, ?, ?, ?)");
 $stmt->bind_param("sssssss", $fio, $phone, $email, $dob, $gender, $bio, $contract);
 $stmt->execute();
 $stmt->close();

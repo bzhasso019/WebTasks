@@ -15,7 +15,7 @@ if ($conn->connect_error) {
 $fio = $_POST['fio'];
 $phone = $_POST['phone'];
 $email = $_POST['email'];
-$dob = $_POST['dob'];
+//$dob = $_POST['dob'];
 $gender = $_POST['gender'];
 $favLanguage = $_POST['fav-language'];
 $bio = $_POST['bio'];
@@ -53,7 +53,8 @@ if (!empty($errors)) {
 }
 
 // Создание записи в таблице с формой
-$stmt = $conn->prepare("INSERT INTO form_data (fio, phone, email, dob, gender, bio, contract) VALUES (?, ?, ?, ?, ?, ?, ?)");
+//$stmt = $conn->prepare("INSERT INTO form_data (fio, phone, email, dob, gender, bio, contract) VALUES (?, ?, ?, ?, ?, ?, ?)");
+$stmt = $conn->prepare("INSERT INTO form_data (fio, phone, email, gender, bio, contract) VALUES (?, ?, ?, ?, ?, ?, ?)");
 $stmt->bind_param("sssssss", $fio, $phone, $email, $dob, $gender, $bio, $contract);
 $stmt->execute();
 $stmt->close();

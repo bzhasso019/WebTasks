@@ -1,118 +1,156 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Регистрационная форма</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-        }
-        .container {
-            width: 400px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .container h2 {
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 700;
-        }
-        .form-group input[type="text"],
-        .form-group input[type="tel"],
-        .form-group input[type="email"],
-        .form-group input[type="date"],
-        .form-group textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .form-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .form-group input[type="checkbox"] {
-            margin-top: 5px;
-        }
-        .button-container {
-            text-align: center;
-        }
-        .button-container button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>Введите данные</h2>
-        <form action="save_form.php" method="post">
-        <div class="form-group">
-                <label for="fio">ФИО:</label>
-                <input type="text" id="fio" name="fio">
-            </div>
-            <div class="form-group">
-                <label for="phone">Телефон:</label>
-                <input type="tel" id="phone" name="phone" >
-            </div>
-            <div class="form-group">
-                <label for="email">E-mail:</label>
-                <input type="email" id="email" name="email">
-            </div>
-            <div class="form-group">
-                <label for="dob">Дата рождения:</label>
-                <input type="date" id="dob" name="dob">
-            </div>
-            <div class="form-group">
-                <label>Пол:</label>
-                <div>
-                    <label for="male">Мужской</label>
-                    <input type="radio" id="male" name="gender" value="male">
-                </div>
-                <div>
-                    <label for="female">Женский</label>
-                    <input type="radio" id="female" name="gender" value="female">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="fav-language">Любимый язык программирования:</label>
-                <select id="fav-language" name="fav-language" multiple>
-                    <option value="pascal">Pascal</option>
-                    <option value="c">C</option>
-                    <option value="cpp">C++</option>
-                    <option value="javascript">JavaScript</option>
-                    <option value="php">PHP</option>
-                    <option value="python">Python</option>
-                    <option value="java">Java</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="bio">Биография:</label>
-                <textarea id="bio" name="bio"></textarea>
-            </div>
-            <div class="form-group">
-                <input type="checkbox" id="contract" name="contract">
-                <label for="contract">Я согласен(на) с условиями контракта</label>
-            </div>
-            <div class="button-container">
-                <button type="submit">Сохранить</button>
-            </div>
-        </form>
-    </div>
-</body>
-</html>
+
+<?php
+  header('Content-Type: text/html; charset=UTF-8');
+
+  $db = '';
+
+  function conn(){
+    global $db;
+    include('connection.php');
+  }
+  
+  if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    if (!empty($_GET['save'])) {
+      // Если есть параметр save, то выводим сообщение пользователю.
+      print('<div class="message">Спасибо, данные сохранены.</div>');
+    }
+    include('form.php');
+    exit();
+  }
+
+  function errp($error){
+    print("<div class='messageError'>$error</div>");
+    exit();
+  }
+
+  function val_empty($val, $name, $o = 0){
+    if(empty($val)){
+      if($o == 0){
+        errp("Заполните поле $name.<br/>");
+      }
+      if($o == 1){
+        errp("Выберите $name.<br/>");
+      }
+      if($o == 2){
+        errp("ознакомьтесь с контрактом<br/>");
+      }
+      exit();
+    }
+  }
+
+  $errors = '';
+  $fio = (isset($_POST['fio']) ? $_POST['fio'] : '');
+  $phone = (isset($_POST['phone']) ? $_POST['phone'] : '');
+  $email = (isset($_POST['email']) ? $_POST['email'] : '');
+  $birthday = (isset($_POST['birthday']) ? strtotime($_POST['birthday']) : '');
+  $gender = (isset($_POST['gender']) ? $_POST['gender'] : '');
+  $like_lang = (isset($_POST['like_lang']) ? $_POST['like_lang'] : '');
+  $biography = (isset($_POST['biography']) ? $_POST['biography'] : '');
+  $oznakomlen = (isset($_POST['oznakomlen']) ? $_POST['oznakomlen'] : '');
+
+  $phone = preg_replace('/\D/', '', $phone);
+  
+  $like_lang_s = ($like_lang != '') ? implode(", ", $like_lang) : [];
+  
+  val_empty($fio, "имя");
+  val_empty($phone, "телефон");
+  val_empty($email, "email");
+  val_empty($birthday, "дата");
+  val_empty($gender, "пол", 1);
+  val_empty($like_lang, "языки", 1);
+  val_empty($biography, "биографию");
+  val_empty($oznakomlen, "ознакомлен", 2);
+  if(empty($fio)){
+    print('пустое поле фио');
+  }
+
+  if(strlen($fio) > 255){
+    $errors = 'Длина поля "ФИО" > 255 символов';
+  }
+  elseif(count(explode(" ", $fio)) < 2 || !preg_match('/^([а-яa-zё]+-?[а-яa-zё]+)( [а-яa-zё]+-?[а-яa-zё]+){1,2}$/Diu', $fio)){
+    $errors = 'Неверный формат ФИО';
+  } 
+  elseif(strlen($phone) != 11 || !preg_match('/^\d{11}$/', $phone)){
+    $errors = 'Неверное значение поля "Телефон"';
+  }
+  elseif(strlen($email) > 255){
+    $errors = 'Длина поля "email" > 255 символов';
+  }
+  elseif(!preg_match('/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/', $email)){
+    $errors = 'Неверное значение поля "email"';
+  }
+  elseif(!is_numeric($birthday) || strtotime("now") < $birthday){
+    $errors = 'Укажите корректно дату';
+  }
+  elseif($gender != "male" && $gender != "female"){
+    $errors = 'Укажите пол';
+  }
+  elseif(count($like_lang) == 0){
+    $errors = 'Укажите языки';
+  }
+
+  if ($errors != '') {
+    errp($errors);
+  }
+
+  conn();
+  $inQuery = implode(',', array_fill(0, count($like_lang), '?'));
+  try {
+    $dbLangs = $db->prepare("SELECT id, name FROM languages WHERE name IN ($inQuery)");
+    foreach ($like_lang as $key => $value) {
+      $dbLangs->bindValue(($key+1), $value);
+    }
+    $dbLangs->execute();
+    $languages = $dbLangs->fetchAll(PDO::FETCH_ASSOC);
+  }
+  catch(PDOException $e){
+    print('Error : ' . $e->getMessage());
+    exit();
+  }
+  
+  if($dbLangs->rowCount() != count($like_lang)){
+    $errors = 'Неверно выбраны языки';
+  }
+  elseif(strlen($biography) > 65535){
+    $errors = 'Длина поля "Биография" > 65 535 символов';
+  }
+
+  if ($errors != '') {
+    errp($errors);
+  }
+
+  try {
+    $stmt = $db->prepare("INSERT INTO form_data (fio, phone, email, birthday, gender, biography) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$fio, $phone, $email, $birthday, $gender, $biography]);
+    $fid = $db->lastInsertId();
+    $stmt1 = $db->prepare("INSERT INTO form_data_lang (id_form, id_lang) VALUES (?, ?)");
+    foreach($languages as $row){
+        $stmt1->execute([$fid, $row['id']]);
+    }
+  }
+  catch(PDOException $e){
+    print('Error : ' . $e->getMessage());
+    exit();
+  }
+
+  //  stmt - это "дескриптор состояния".
+  
+  //  Именованные метки.
+  //$stmt = $db->prepare("INSERT INTO test (label,color) VALUES (:label,:color)");
+  //$stmt -> execute(['label'=>'perfect', 'color'=>'green']);
+  
+  //Еще вариант
+  /*$stmt = $db->prepare("INSERT INTO users (firstname, lastname, email) VALUES (:firstname, :lastname, :email)");
+  $stmt->bindParam(':firstname', $firstname);
+  $stmt->bindParam(':lastname', $lastname);
+  $stmt->bindParam(':email', $email);
+  $firstname = "John";
+  $lastname = "Smith";
+  $email = "john@test.com";
+  $stmt->execute();
+  */
+
+  // Делаем перенаправление.
+  // Если запись не сохраняется, но ошибок не видно, то можно закомментировать эту строку чтобы увидеть ошибку.
+  // Если ошибок при этом не видно, то необходимо настроить параметр display_errors для PHP.
+  header('Location: ?save=1');
